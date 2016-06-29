@@ -34,7 +34,7 @@ function connect(clientRequest, clientSocket) {
         }
     }
     if (!passed) {
-        log.error(() => sprintf("client request remote host: %s , port: %s ", host, port));
+        log.error(sprintf("client request remote host: %s , port: %s ", host, port));
         clientSocket.end();
         return;
     }
