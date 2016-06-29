@@ -4,7 +4,7 @@ var url = require('url');
 var Log = require('fuzelog');
 var logConfig = {
     level: 'info', // INFO logging level
-    name: 'fuzelog', // Category name, shows as %c in pattern
+    name: 'tunnel', // Category name, shows as %c in pattern
     // FileStream to log to (can be file name or a stream)
     file: __dirname + '/proxy.log',
     fileFlags: 'a', // Flags used in fs.createWriteStream to create log file
