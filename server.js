@@ -34,17 +34,17 @@ function connect(clientRequest, clientSocket) {
         }
     }
     if (!passed) {
-        log.error(sprintf("client request remote host: %s , port: %s ", host, port));
+        log.error(sprintf("forbidden: %s connect to %s:%s ", clientSocket.remoteAddress, host, port));
         clientSocket.end();
         return;
     }
 
-    log.info(sprintf("client request remote host: %s, port: %s", host, port));
+    log.info(sprintf("%s connect to %s:%s", clientSocket.remoteAddress, host, port));
 
     var remoteSocket = net.connect(port, host, function() {
         clientSocket.write('HTTP/1.1 200 Connection Established\r\n\r\n');
-        log.info("remote host connected.");
         remoteSocket.pipe(clientSocket);
+        log.info(sprintf("%s connected to %s:%s.", clientSocket.remoteAddress, host, port));
     }).on('error', function(e) {
         log.error('something happened');
         clientSocket.end();
