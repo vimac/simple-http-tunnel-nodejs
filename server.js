@@ -4,8 +4,10 @@ var url = require('url');
 var Log = require('fuzelog');
 var config = require('./config');
 var log = new Log(config.logConfig);
+var cluster = require('cluster');
+var numCPUs = require('os').cpus().length;
 
-function connect(clientRequest, clientSocket) {
+function onConnect(clientRequest, clientSocket) {
     var requestUrl = clientRequest.url;
     var hostParts = requestUrl.match(/^(\S+):(\d{1,5})$/);
     var host = hostParts[1];
@@ -41,4 +43,15 @@ function connect(clientRequest, clientSocket) {
     clientSocket.pipe(remoteSocket);
 }
 
-http.createServer().on('connect', connect).listen(config.bindPort, config.bindHost);
+if (cluster.isMaster) {
+    for (var i = 0; i < numCPUs; i++) {
+        log.info(sprintf('forking for cpu %s', i));
+        cluster.fork();
+    }
+
+    cluster.on('exit', function(worker, code, signal) {
+        log.info(printf('worker %s died', worker.process.pid))
+    });
+} else {
+    http.createServer().on('connect', onConnect).listen(config.bindPort, config.bindHost);
+}
