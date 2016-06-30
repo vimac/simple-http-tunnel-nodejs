@@ -2,20 +2,8 @@ var http = require('http');
 var net = require('net');
 var url = require('url');
 var Log = require('fuzelog');
-var logConfig = {
-    level: 'info', // INFO logging level
-    name: 'tunnel', // Category name, shows as %c in pattern
-    // FileStream to log to (can be file name or a stream)
-    file: __dirname + '/proxy.log',
-    fileFlags: 'a', // Flags used in fs.createWriteStream to create log file
-    consoleLogging: true, // Flag to direct output to console
-    colorConsoleLogging: true, // Flag to color output to console
-    // Usage of the log4js layout
-    logMessagePattern: '[%d{ISO8601}] [%p] %m{1}'
-};
-var log = new Log(logConfig);
-
-var allowHosts = ["github.com:80", "github.com:443", /.*vifix\.cn:80/, /.*vifix\.cn:443/];
+var config = require('./config');
+var log = new Log(config.logConfig);
 
 function connect(clientRequest, clientSocket) {
     var requestUrl = clientRequest.url;
@@ -24,11 +12,11 @@ function connect(clientRequest, clientSocket) {
     var port = hostParts[2];
 
     var passed = false;
-    for (var i = 0; i < allowHosts.length; i++) {
-        if (typeof allowHosts[i] == 'string' && requestUrl == allowHosts[i]) {
+    for (var i = 0; i < config.whiteList.length; i++) {
+        if (typeof config.whiteList[i] == 'string' && requestUrl == config.whiteList[i]) {
             passed = true;
             break;
-        } else if (allowHosts[i]instanceof RegExp && requestUrl.match(allowHosts[i])) {
+        } else if (config.whiteList[i]instanceof RegExp && requestUrl.match(config.whiteList[i])) {
             passed = true;
             break;
         }
@@ -53,4 +41,4 @@ function connect(clientRequest, clientSocket) {
     clientSocket.pipe(remoteSocket);
 }
 
-http.createServer().on('connect', connect).listen(8888, '0.0.0.0');
+http.createServer().on('connect', connect).listen(config.bindPort, config.bindHost);
